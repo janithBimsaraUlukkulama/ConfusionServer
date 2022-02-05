@@ -21,11 +21,25 @@ router.post('/signup', (req, res, next) => {
                 res.json({ err: err });
             }
             else {
-                passport.authenticate('local')(req, res, () => {
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json({ success: true, status: 'Registration Successful!' });
-                });
+                if (req.body.firstName)
+                    user.firstName = req.body.firstName;
+                    
+                if (req.body.lastName)
+                    user.lastName = req.body.lastName;
+
+                user.save((err, user) => {
+                    if (err) {
+                        res.statusCode = 500;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json({ err: err });
+                        return;
+                    }
+                    passport.authenticate('local')(req, res, () => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json({ success: true, status: 'Registration Successful!' });
+                    });
+                })
             }
         });
 });
@@ -49,7 +63,7 @@ router.get('/logout', (req, res, next) => {
         var err = new Error('You are not logged in!');
         err.status = 403;
         next(err);
-        
+
     }
 });
 
